@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
-import { AppChart } from '../chart-component/chart-component';
 import {
   ChartComponent,
   ApexAxisChartSeries,
@@ -60,13 +59,13 @@ export type ChartOptions = {
   standalone: true
 })
 
-export class CriptoComponent implements AfterViewInit, OnDestroy,OnInit {
+export class CriptoComponent implements AfterViewInit, OnDestroy, OnInit {
   @Input() coin: any = null;
   grafikoDatuak = signal<any[]>([]);
 
   constructor(private http: HttpClient) { }
   ngOnInit(): void {
-
+    this.lortuInfo();
   }
 
   getInfo(): Observable<any> {
@@ -74,8 +73,7 @@ export class CriptoComponent implements AfterViewInit, OnDestroy,OnInit {
     return this.http.get(url);
   }
 
-  lortuInfo(coin: string): void {
-    const targetCoin = coin || this.coin;
+  lortuInfo(): void {
     this.getInfo().subscribe({
       next: (res: any) => {
         this.grafikoDatuakEskuratu(res);
@@ -85,31 +83,100 @@ export class CriptoComponent implements AfterViewInit, OnDestroy,OnInit {
   }
 
 
-  grafikoDatuakEskuratu(res:any) {
+  grafikoDatuakEskuratu(res: any) {
     let data = res.prices
     var data2: any = [];
     data.forEach((element: { t: any; eur: any; }) => {
       data2.push([element.t, element.eur])
     });
-    this.grafikoDatuak.set(data2);
+
+    this.grafikoDatuak.set([
+      {
+        name: `Precio (${res.coin ? res.coin.toUpperCase() : 'EUR'})`,
+        data: data2
+      }
+    ])
+
+
+
+
+    //this.grafikoDatuak.set(data2);
   }
 
-   private dataSeries: any = [
-    [{
-        "date": "1791950400000",
-        "value": 45
-      },
-      {
-        "date": "1792050400000",
-        "value": 45
-      },
-    ]]
+  private dataSeries: any = [
+    {
+      "x": 1791950400000,
+      "y": 100
+    },
+    {
+      "x": 1792050400000,
+      "y": 45
+    },
+  ]
 
   chartOptions = signal<Partial<ChartOptions>>({
     series: [{
       name: 'Network Traffic',
-      data: this.dataSeries
+      data: this.grafikoDatuak()
     }],
+    chart: {
+      type: 'area',
+      stacked: false,
+      height: 350,
+      zoom: {
+        type: 'x',
+        enabled: true,
+        autoScaleYaxis: true,
+      },
+      toolbar: {
+        autoSelected: 'zoom',
+      },
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    markers: {
+      size: 0,
+    },
+    title: {
+      text: 'Stock Price Movement',
+      align: 'left',
+    },
+    fill: {
+      type: 'gradient',
+      gradient: {
+        shadeIntensity: 1,
+        inverseColors: false,
+        opacityFrom: 0.5,
+        opacityTo: 0,
+        stops: [0, 90, 100],
+      },
+    },
+    yaxis: {
+      labels: {
+        formatter: (val) => {
+          return '$' + val
+        },
+      },
+      title: {
+        text: 'Price',
+      },
+    },
+    xaxis: {
+      type: 'datetime',
+    },
+  });
+
+
+
+
+  public chartOptions2: Partial<ChartOptions> = {
+    series: [
+      {
+        name: 'Meridian Motors',
+        data: this.dataSeries,
+      },
+    ],
     chart: {
       type: 'area',
       stacked: false,
@@ -156,65 +223,7 @@ export class CriptoComponent implements AfterViewInit, OnDestroy,OnInit {
     xaxis: {
       type: 'datetime',
     },
-  });
-
-
-
-
- public chartOptions2: Partial<ChartOptions> = {
-          series: [
-            {
-              name: 'Meridian Motors',
-              data: this.dataSeries,
-            },
-          ],
-          chart: {
-            type: 'area',
-            stacked: false,
-            height: 350,
-            zoom: {
-              type: 'x',
-              enabled: true,
-              autoScaleYaxis: true,
-            },
-            toolbar: {
-              autoSelected: 'zoom',
-            },
-          },
-          dataLabels: {
-            enabled: false,
-          },
-          markers: {
-            size: 0,
-          },
-          title: {
-            text: 'Stock Price Movement',
-            align: 'left',
-          },
-          fill: {
-            type: 'gradient',
-            gradient: {
-              shadeIntensity: 1,
-              inverseColors: false,
-              opacityFrom: 0.5,
-              opacityTo: 0,
-              stops: [0, 90, 100],
-            },
-          },
-          yaxis: {
-            labels: {
-              formatter: (val) => {
-                return '$' + (val / 1000000).toFixed(0)
-              },
-            },
-            title: {
-              text: 'Price',
-            },
-          },
-          xaxis: {
-            type: 'datetime',
-          },
-        };
+  };
 
 
   ngAfterViewInit() {
