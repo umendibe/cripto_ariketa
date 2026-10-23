@@ -1,9 +1,9 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { HeaderComponent } from './header-component/header-component';
+import { CriptoComponent } from './cripto-component/cripto-component';
 
 @Component({
-  imports: [RouterOutlet, HeaderComponent],
+  imports: [RouterOutlet, CriptoComponent],
   selector: 'app-root',
   styleUrl: './app.css',
   templateUrl: './app.html',
